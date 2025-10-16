@@ -1,19 +1,21 @@
 #include "Inventory.h"
 #include <iostream>
 #include <algorithm>
+using namespace std;
 
 // Constructor
-Inventory::Inventory() {
+Inventory::Inventory() : head(nullptr) {
     // Vector is automatically initialized as empty
 }
 
 // Destructor - Important! Clean up dynamically allocated memory
 Inventory::~Inventory() {
     // Delete all Book objects to prevent memory leaks
-    for (Book* book : books) {
-        delete book;
+    while (head) {
+        Node* next = head->next; 
+        delete head;
+        head = next;
     }
-    books.clear();
 }
 
 // Add a book to the inventory (sorted by title alphabetically)
@@ -22,66 +24,103 @@ void Inventory::addBook(Book* bookPtr) {
         std::cout << "Error: Cannot add null book pointer.\n";
         return;
     }
+    Node* newNode = new Node(bookPtr);
 
+    if (!head || bookPtr->getTitle() < head->data->getTitle()){
+        newNode->next = head;
+        head = newNode;
+        cout << "Book '" << bookPtr->getTitle() << "' added at head." << endl;
+        return;
+    }
     // Find the correct position to insert (alphabetical order by title)
-    auto insertPos = std::upper_bound(books.begin(), books.end(), bookPtr,
-        [](const Book* a, const Book* b) {
-            return a->getTitle() < b->getTitle();
-        });
+    Node* current = head;
+    while (current->next && current->next->data->getTitle() < bookPtr->getTitle()){
+        current = current->next;
+    }
+    newNode->next = current->next;
+    current->next = newNode;
+    cout << "Book '" << bookPtr->getTitle() << "' added to inventory." << endl;
 
-    books.insert(insertPos, bookPtr);
-    std::cout << "Book '" << bookPtr->getTitle() << "' added to inventory.\n";
 }
 
 // Display all books in the inventory
 void Inventory::displayAll() const {
-    if (books.empty()) {
+    if (!head) {
         std::cout << "No books in inventory.\n";
         return;
     }
 
     std::cout << "\n=== INVENTORY CONTENTS ===\n";
-    std::cout << "Total books: " << books.size() << "\n\n";
-    
-    for (size_t i = 0; i < books.size(); ++i) {
-        std::cout << "Book #" << (i + 1) << ":\n";
-        books[i]->displayInfo();
+    size_t count = 0;
+    Node* current = head;
+    while(current){
+        current = current->next;
+        ++count;
+    }
+    std::cout << "Total books: " << count << "\n\n";
+    count = 0;
+    current = head;
+    while(current){
+        cout << "Book #" << ++count << ":" << endl;
+        current->data->displayInfo();
+        current = current->next;
     }
     std::cout << "\n";
 }
 
 // Remove a book by title
 void Inventory::removeBook(const std::string& title) {
-    auto it = std::find_if(books.begin(), books.end(),
-        [&title](const Book* book) {
-            return book->getTitle() == title;
-        });
-
-    if (it != books.end()) {
-        std::cout << "Removing book: " << (*it)->getTitle() << "\n";
-        delete *it; // Free the memory
-        books.erase(it);
+    if(!head){
+        cout << "Inventory is empty." << endl;
+        return;
+    }
+    if(head->data->getTitle() == title){
+        Node* temp = head;
+        head = head->next;
+        delete temp->data;
+        delete temp;
+        cout << "Removed book '" << title << "'." << endl;
+        return;
+    }
+    Node* current = head;
+    while(current->next && current->next->data->getTitle() != title){
+        current = current->next;
+    }
+    if (current->next){
+        Node* temp = current->next;
+        current->next = temp->next;
+        delete temp->data;
+        delete temp;
+        cout << "Removed book '" << title << "'." << endl;
     } else {
-        std::cout << "Book '" << title << "' not found in inventory.\n";
+        cout << "Book '" << title << "' not found." << endl;
     }
 }
 
 // Get the number of books
 size_t Inventory::getBookCount() const {
-    return books.size();
+    size_t count = 0;
+    Node* current = head;
+    while (current){
+        count++;
+        current = current->next;
+    }
+    return count;
 }
 
 // Search for a book by title
 Book* Inventory::findBook(const std::string& title) const {
-    auto it = std::find_if(books.begin(), books.end(),
-        [&title](const Book* book) {
-            return book->getTitle() == title;
-        });
-    
-    return (it != books.end()) ? *it : nullptr;
+    Node* current = head;
+    while(current){
+        if(current->data->getTitle() == title){
+            return current->data;
+        }
+        current = current->next;
+    }
+    return nullptr;
 }
 
 // Check if inventory is empty
 bool Inventory::isEmpty() const {
-    return books.empty();
+    return head == nullptr;
 }

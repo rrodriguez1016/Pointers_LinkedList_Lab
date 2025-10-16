@@ -1,7 +1,7 @@
 /*
  * Book Inventory Management System
- * Author: [Your Name]
- * Date: [Current Date]
+ * Author: [Rene Rodriguez]
+ * Date: [10/15/2025]
  * Purpose: Demonstrate the use of dynamic memory allocation and pointers
  *          with a vector-based inventory system for books.
  *
@@ -31,9 +31,9 @@ int main() {
         demonstrateInventory();
 
         // Optional: Uncomment for interactive mode
-        // std::cout << "\n=== Interactive Mode ===\n";
-        // Inventory userInventory;
-        // interactiveMenu(userInventory);
+        std::cout << "\n=== Interactive Mode ===\n";
+        Inventory userInventory;
+        interactiveMenu(userInventory);
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

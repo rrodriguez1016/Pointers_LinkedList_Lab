@@ -8,11 +8,12 @@
 
 class Inventory {
 private:
-    std::vector<Book*> books; // Vector of Book pointers...
-    //  Replace with a node structure struct/class definition
-    //  and a variable to reference the pointer to the head of your list
-    //  Remeber when the head node pointer points to nullPtr, the list is empty
-
+   struct Node {
+        Book* data;
+        Node* next;
+        Node(Book* bookPtr) : data(bookPtr), next(nullptr) {}
+    };
+    Node* head;
 public:
 
     // Constructor
